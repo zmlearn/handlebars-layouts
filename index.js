@@ -1,5 +1,8 @@
 'use strict';
 
+var Path = require('path');
+var FS = require('fs');
+
 function noop() {
 	return '';
 }
@@ -106,10 +109,14 @@ function layouts(handlebars) {
 			// Mix custom context and hash into context
 			mixin(context, customContext, options.hash);
 
-			// Partial template required
-			if (template == null) {
-				throw new Error('Missing partial: \'' + name + '\'');
-			}
+            if (template == null) {
+                var templatePath = Path.resolve(Path.dirname(context.filename), name);
+                if (!/\.hbs$/i.test(name)) {
+                    templatePath += '.hbs';
+                }
+                
+                template = FS.readFileSync(templatePath, 'utf-8');
+            }
 
 			// Compile partial, if needed
 			if (typeof template !== 'function') {
